@@ -1,11 +1,11 @@
 package com.fernandopaniagua.juansapp.domain;
 
-public class Mensaje {
+public class Message {
     private int id;
     private String emisor;
     private String texto;
 
-    public Mensaje(int id, String emisor, String texto) {
+    public Message(int id, String emisor, String texto) {
         this.id = id;
         this.emisor = emisor;
         this.texto = texto;

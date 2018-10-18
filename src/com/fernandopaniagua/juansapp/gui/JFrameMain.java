@@ -5,8 +5,14 @@
  */
 package com.fernandopaniagua.juansapp.gui;
 
-import com.fernandopaniagua.juansapp.domain.Mensaje;
+import com.fernandopaniagua.juansapp.domain.Message;
+import com.fernandopaniagua.juansapp.domain.MessagesReader;
+import com.fernandopaniagua.juansapp.persistence.MessagesManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -14,16 +20,27 @@ import java.util.ArrayList;
  */
 public class JFrameMain extends javax.swing.JFrame {
 
-    /**
-     * Creates new form JFrameMain
-     */
+    MessagesManager mm = null;
+    String nickName = null;
+
     public JFrameMain() {
         initComponents();
-        setBounds(10,10,300,400);
+        setBounds(10, 10, 305, 500);
         setTitle("Juansapp v0.1b");
+        try {
+            mm = new MessagesManager();
+            new MessagesReader(mm,this).start();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al conectarse con la base de datos",
+                    "JuansApp",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
-    
-    public void refrescarMensajes(ArrayList<Mensaje> mensajes){
+
+    public void refrescarMensajes(ArrayList<Message> mensajes) {
         System.out.println("Refrescando");
     }
 
@@ -36,49 +53,87 @@ public class JFrameMain extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTextField1 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        jtNickName = new javax.swing.JTextField();
+        jbEnviar = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jTextField2 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        jtaTextPanel = new javax.swing.JTextArea();
+        jtMessage = new javax.swing.JTextField();
+        jbSend = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
+        getContentPane().add(jtNickName);
+        jtNickName.setBounds(10, 10, 200, 20);
 
-        jTextField1.setText("jTextField1");
-        getContentPane().add(jTextField1);
-        jTextField1.setBounds(10, 10, 200, 20);
+        jbEnviar.setText("Set Nickname");
+        jbEnviar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbEnviarActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jbEnviar);
+        jbEnviar.setBounds(10, 40, 200, 23);
 
-        jButton1.setText("jButton1");
-        getContentPane().add(jButton1);
-        jButton1.setBounds(10, 40, 73, 23);
-
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        jtaTextPanel.setColumns(20);
+        jtaTextPanel.setRows(5);
+        jScrollPane1.setViewportView(jtaTextPanel);
 
         getContentPane().add(jScrollPane1);
         jScrollPane1.setBounds(10, 70, 270, 250);
+        getContentPane().add(jtMessage);
+        jtMessage.setBounds(10, 330, 270, 20);
 
-        jTextField2.setText("jTextField2");
-        getContentPane().add(jTextField2);
-        jTextField2.setBounds(10, 330, 270, 20);
-
-        jButton2.setText("jButton2");
-        getContentPane().add(jButton2);
-        jButton2.setBounds(10, 360, 73, 23);
+        jbSend.setText("Send");
+        jbSend.setEnabled(false);
+        jbSend.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbSendActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jbSend);
+        jbSend.setBounds(10, 360, 270, 60);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jbEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbEnviarActionPerformed
+        this.nickName = jtNickName.getText();
+        jbSend.setEnabled(true);
+    }//GEN-LAST:event_jbEnviarActionPerformed
+
+    private void jbSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbSendActionPerformed
+        String message = jtMessage.getText();
+
+        try {
+            mm.sendMessage(new Message(-1, this.nickName, message));
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al enviar mensaje",
+                    "Juansapp",
+                    JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_jbSendActionPerformed
+
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JButton jbEnviar;
+    private javax.swing.JButton jbSend;
+    private javax.swing.JTextField jtMessage;
+    private javax.swing.JTextField jtNickName;
+    private javax.swing.JTextArea jtaTextPanel;
     // End of variables declaration//GEN-END:variables
+
+    public void showMessages(ArrayList<Message> alMessages){
+        jtaTextPanel.setText("");
+        for (int i = 0; i < alMessages.size(); i++) {
+            jtaTextPanel.append(
+                    alMessages.get(i).getEmisor() +
+                    ":" + 
+                    alMessages.get(i).getTexto() +
+                    "\n");
+        }
+    }
 }
